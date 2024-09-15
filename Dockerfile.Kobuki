@@ -1,0 +1,14 @@
+FROM ros2_docker_base
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-sophus && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN usermod -aG dialout $USERNAME
+
+RUN cat <<EOF >> ${BASH_PATH}
+    alias cb_seq='rosdep_install ./src && colcon build --symlink-install --executor sequential && rsource'
+EOF
+
+
+CMD [ "bash", "-i" ]
