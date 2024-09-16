@@ -11,7 +11,7 @@ endef
 
 # Default build arguments
 # docker build -t ros2_docker_base -f Dockerfile .
-BUILD_ARGS ?= --build-arg USERNAME=mahdi_docker
+BUILD_ARGS ?= --build-arg USERNAME=docker_user
 .PHONY: build
 build:
 	docker build -t ros2_docker_base -f Dockerfile . $(BUILD_ARGS)
