@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="generate_link" params="parent link_idx link_length link_width link_height joint_type *origin *limit *axis">
+
+        <!-- Define link name -->
+        <xacro:property name="link_name" value="robot_link_${link_idx}" />
+
+        <!-- Create joint to connect parent to link -->
+        <joint name="robot_joint_${link_idx}" type="${joint_type}">
+            <xacro:insert_block name="origin" />
+            <parent link="${parent}"/>
+            <child link="${link_name}"/>
+            <xacro:insert_block name="limit" />
+            <xacro:insert_block name="axis" />
+        </joint>
+        
+        <!-- Create link -->
+        <link name="${link_name}">
+            <visual>
+            <geometry>
+                <box size="${link_length} ${link_width} ${link_height}"/>
+            </geometry>
+            <origin xyz="${link_length/2} 0.0 -${link_height/2}"/>
+            </visual>
+        </link>
+    </xacro:macro>
+</robot>

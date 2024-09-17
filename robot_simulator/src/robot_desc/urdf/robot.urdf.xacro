@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+  <xacro:include filename="tower.urdf.xacro" />
+  <xacro:include filename="arm.urdf.xacro" />
+
+  <!-- Use xacro args to pass in from cmd line -->
+  <xacro:property name="tower_radius" value="0.2" />
+  <xacro:property name="tower_height" value="1" />
+  <xacro:property name="link_height" value="0.06" />
+  <xacro:property name="link_width" value="0.12" />
+  <xacro:property name="enable_prismatic" value="True" />
+  <xacro:property name="generate_tower" value="True" />
+
+  <!-- Create different config.yamls for robot on its own, on tower, tower with prismatic etc -->
+  <!-- So the config will give us the right link lengths, joint limits and joint axes -->
+  <xacro:property name="link_lengths" value="${[0.1, 0.4, 0.3, 0.2]}"/>
+
+  <!-- Create fixed world link -->
+  <link name="world"/>
+
+  <!-- Generate robot tower and setup params for arm generation -->
+  <xacro:if value="${generate_tower == True}">
+    <xacro:property name="arm_link_lengths" value="${link_lengths[1::]}"/>
+    <xacro:property name="tower_link_length" value="${link_lengths[0]}"/>
+    <xacro:property name="arm_parent" value="robot_link_0"/>
+    <xacro:generate_tower parent="world" tower_radius="${tower_radius}" tower_height="${tower_height}" tower_link_length="${tower_link_length}" enable_prismatic="${enable_prismatic}"/>
+    <xacro:property name="arm_origin" value="${tower_link_length} 0.0 -${link_height}"/>
+    <xacro:property name="arm_link_start_idx" value="1"/>
+  </xacro:if>
+
+  <!-- Do not generate robot tower and setup params for arm generation -->
+  <xacro:unless value="${generate_tower == True}">
+    <xacro:property name="arm_link_lengths" value="${link_lengths}"/>
+    <xacro:property name="arm_parent" value="world"/>
+    <xacro:property name="arm_origin" value="0.0 0.0 ${link_height}"/>
+    <xacro:property name="arm_link_start_idx" value="0"/>
+  </xacro:unless>
+
+  <!-- Generate robot arm -->
+  <xacro:generate_arm parent="${arm_parent}" arm_link_start_idx="${arm_link_start_idx}" link_height="${link_height}" link_width="${link_width}" link_lengths="${arm_link_lengths}">
+    <origin xyz="${arm_origin}"/>
+  </xacro:generate_arm>
+
+
+</robot>

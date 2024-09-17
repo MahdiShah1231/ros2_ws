@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="link.urdf.xacro" />
+    <xacro:macro name="generate_tower" params="parent tower_height tower_radius tower_link_length enable_prismatic">
+
+        <!-- Create world joint -->
+        <joint name="world_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="robot_tower"/>
+        </joint>
+        
+        <!-- Create robot tower -->
+        <link name="robot_tower">
+            <visual>
+                <geometry>
+                    <cylinder length="${tower_height}" radius="${tower_radius}"/>
+                </geometry>
+                <origin xyz="0.0 0.0 ${tower_height/2}"/>
+            </visual>
+        </link>
+
+        <!-- Configure tower link joint type (prismatic or fixed) -->
+        <xacro:if value="${enable_prismatic == True}">
+            <xacro:property name="tower_joint_type" value="prismatic"/>
+        </xacro:if>
+        <xacro:unless value="${enable_prismatic == True}">
+            <xacro:property name="tower_joint_type" value="fixed"/>
+        </xacro:unless>
+
+        <!-- Generate tower link for beginning of robot arm  -->
+        <xacro:generate_link parent="robot_tower" link_idx="0" link_length="${tower_link_length}" link_width="${link_width}" link_height="${link_height}" joint_type="${tower_joint_type}">
+            <origin xyz="${tower_radius} 0.0 ${(tower_height/2) + (link_height/2)}"/>
+            <axis xyz="0.0 0.0 1.0"/>
+            <limit lower="${-(tower_height/2) + (link_height/2)}" upper="${(tower_height/2) - (link_height/2)}" effort="1.0" velocity="1.0"/>
+        </xacro:generate_link>
+
+    </xacro:macro>
+</robot>

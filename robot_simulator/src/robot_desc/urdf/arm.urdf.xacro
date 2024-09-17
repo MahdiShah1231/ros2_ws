@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="link.urdf.xacro" />
+    <xacro:macro name="generate_arm" params="parent arm_link_start_idx:=0 link_height link_width link_lengths *origin">
+        <xacro:property name="n_links" value="${len(link_lengths)}"/>
+        
+        <!-- Create loop to generate robot arm links -->
+        <!-- Currently only support revolute joints around Z axis each with same joint limits -->
+        <xacro:macro name="generate_link_loop" params="link_idx:=${arm_link_start_idx} link_parent:=${parent} n_links:=${n_links}">
+            
+            <!-- Define link_length_idx to account for links not related to the robot arm kinematic chain -->
+            <xacro:property name="link_length_idx" value="${link_idx-arm_link_start_idx}"/>
+            
+            <xacro:unless value="${link_length_idx >= n_links}">
+                
+                <!-- Call generate_link macro -->
+                <xacro:generate_link parent="${link_parent}" link_idx="${link_idx}" link_length="${link_lengths[link_length_idx]}" link_width="${link_width}" link_height="${link_height}" joint_type="revolute">
+                    
+                    <xacro:if value="${link_idx == arm_link_start_idx}">
+                        <!-- Insert origin marco block param to handle connection between initial arm link and parent -->
+                        <xacro:insert_block name="origin" />
+                    </xacro:if>
+                    
+                    <xacro:unless value="${link_idx == arm_link_start_idx}">
+                        <!-- Set origin for each successive link
+                        Origin is from the preceding link length -->
+                        <origin xyz="${link_lengths[link_length_idx-1]} 0.0 -${link_height}"/>
+                    </xacro:unless>
+                    
+                    <axis xyz="0.0 0.0 1.0"/>
+                    <limit lower="-1.57" upper="1.57" effort="1.0" velocity="1.0"/>
+                
+                </xacro:generate_link>
+                
+                <!-- Generate name for link to pass as parent for recursive call -->
+                <xacro:property name="link_name" value="robot_link_${link_idx}" />
+
+                <!-- Recursive call to loop macro and incrementing link_idx -->
+                <xacro:generate_link_loop link_idx="${link_idx + 1}" link_parent="${link_name}" n_links="${n_links}"/>
+            </xacro:unless>
+
+        </xacro:macro>
+        
+        <!-- Call macro to generate robot arm links -->
+        <xacro:generate_link_loop/>
+        
+    </xacro:macro>
+</robot>
