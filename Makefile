@@ -10,7 +10,6 @@ define clean_img_if_exists
 endef
 
 # Default build arguments
-# docker build -t ros2_docker_base -f Dockerfile .
 BUILD_ARGS ?= --build-arg USERNAME=docker_user
 .PHONY: build
 build:
